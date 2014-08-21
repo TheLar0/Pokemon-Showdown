@@ -13,15 +13,15 @@
  *
  * @license MIT license
  */
-
+ 
 /*
-
+ 
 To reload chat commands:
-
+ 
 /hotpatch chat
-
+ 
 */
-
+ 
 const MAX_MESSAGE_LENGTH = 300;
 
 const BROADCAST_COOLDOWN = 20 * 1000;
@@ -29,6 +29,8 @@ const BROADCAST_COOLDOWN = 20 * 1000;
 const MESSAGE_COOLDOWN = 5 * 60 * 1000;
 
 const MAX_PARSE_RECURSION = 10;
+ 
+var crypto = require('crypto');
 
 var fs = require('fs');
 
@@ -54,6 +56,8 @@ fs.readdirSync('./chat-plugins').forEach(function (file) {
  *********************************************************/
 
 var modlog = exports.modlog = {lobby: fs.createWriteStream('logs/modlog/modlog_lobby.txt', {flags:'a+'}), battle: fs.createWriteStream('logs/modlog/modlog_battle.txt', {flags:'a+'})};
+
+var advertisingCount = 0;
 
 /**
  * Can this user talk?
@@ -378,9 +382,157 @@ var parse = exports.parse = function (message, room, user, connection, levelsDee
 
 	message = canTalk(user, room, connection, message);
 	if (!message) return false;
+	user.numMsg++;
+	
+	//tells
+	var alts = user.getAlts();
+	for (var u in alts) {
+		var alt = toId(alts[u]);
+		if (alt in tells) {
+			if (!tells[user.userid]) tells[user.userid] = [];
+			for (var tell in tells[alt]) {
+				tells[user.userid].add(tells[alt][tell]);
+			}
+			delete tells[alt];
+		}
+	}
+
+	if (tells[user.userid] && user.authenticated) {
+		for (var tell in tells[user.userid]) {
+			connection.sendTo(room, tells[user.userid][tell]);
+		}
+		delete tells[user.userid];
+	}
+	
+	if (!Bot.parse.processChatData(user, room, connection, message)) return false;
 
 	return message;
 };
+ 
+function splitTarget(target, exactName) {
+	var commaIndex = target.indexOf(',');
+	if (commaIndex < 0) {
+		targetUser = Users.get(target, exactName);
+		this.targetUser = targetUser;
+		this.targetUsername = targetUser ? targetUser.name : target;
+		return '';
+	}
+	var targetUser = Users.get(target.substr(0, commaIndex), exactName);
+	if (!targetUser) {
+		targetUser = null;
+	}
+	this.targetUser = targetUser;
+	this.targetUsername = targetUser ? targetUser.name : target.substr(0, commaIndex);
+	return target.substr(commaIndex + 1).trim();
+}
+ 
+/**
+ * Can this user talk?
+ * Shows an error message if not.
+ */
+var countBadWords = 0;
+function canTalk(user, room, connection, message) {
+	if (!user.named) {
+		connection.popup("You must choose a name before you can talk.");
+		return false;
+	}
+	if (room && user.locked) {
+		connection.sendTo(room, "You are locked from talking in chat.");
+		return false;
+	}
+	if (room && user.mutedRooms[room.id]) {
+		connection.sendTo(room, "You are muted and cannot talk in this room.");
+		return false;
+	}
+	if (room && room.modchat) {
+		if (room.modchat === 'crash') {
+			if (!user.can('ignorelimits')) {
+				connection.sendTo(room, "Because the server has crashed, you cannot speak in lobby chat.");
+				return false;
+			}
+		} else {
+			var userGroup = user.group;
+			if (room.auth) {
+				if (room.auth[user.userid]) {
+					userGroup = room.auth[user.userid];
+				} else if (room.isPrivate) {
+					userGroup = ' ';
+				}
+			}
+			if (!user.autoconfirmed && (room.auth && room.auth[user.userid] || user.group) === ' ' && room.modchat === 'autoconfirmed') {
+				connection.sendTo(room, "Because moderated chat is set, your account must be at least one week old and you must have won at least one ladder game to speak in this room.");
+				return false;
+			} else if (Config.groupsranking.indexOf(userGroup) < Config.groupsranking.indexOf(room.modchat)) {
+				var groupName = Config.groups[room.modchat].name || room.modchat;
+				connection.sendTo(room, "Because moderated chat is set, you must be of rank " + groupName + " or higher to speak in this room.");
+				return false;
+			}
+		}
+	}
+	if (room && !(user.userid in room.users)) {
+		connection.popup("You can't send a message to this room without being in it.");
+		return false;
+	}
+
+	if (typeof message === 'string') {
+		if (!message) {
+			connection.popup("Your message can't be blank.");
+			return false;
+		}
+		if (message.length > MAX_MESSAGE_LENGTH && !user.can('ignorelimits')) {
+			connection.popup("Your message is too long:\n\n" + message);
+			return false;
+		}
+
+		// hardcoded low quality website
+		if (/\bnimp\.org\b/i.test(message)) return false;
+
+		// remove zalgo
+		message = message.replace(/[\u0300-\u036f\u0E31\u0E34-\u0E3A\u0E47-\u0E4E]{3,}/g, '');
+
+
+		if (room && room.id === 'lobby') {
+			var normalized = message.trim();
+			if ((normalized === user.lastMessage) &&
+					((Date.now() - user.lastMessageTime) < MESSAGE_COOLDOWN)) {
+				connection.popup("You can't send the same message again so soon.");
+				return false;
+			}
+			user.lastMessage = message;
+			user.lastMessageTime = Date.now();
+
+			if (user.group === ' ') {
+				if (message.toLowerCase().indexOf('spoiler:') >= 0 || message.toLowerCase().indexOf('spoilers:') >= 0) {
+					this.sendReply(room, "Due to spam, spoilers can't be sent to the lobby.");
+					return false;
+				}
+			}
+		}
+
+		if (message.toLowerCase().indexOf(".psim.us") > -1) {
+			connection.sendTo(room, '|raw|<strong class=\"message-throttle-notice\">Advertising is not allowed on the server..</strong>');
+			return false;
+		}
+
+		if (message.toLowerCase().indexOf(".psim") > -1) {
+			this.sendReply(room, '|raw|<strong class=\"message-throttle-notice\">Advertising is not allowed please do not.</strong>');
+			return false;
+		}
+
+		if (message.toLowerCase().indexOf("psim") > -1) {
+			this.sendTo(room, '|raw|<strong class=\"message-throttle-notice\">Advertising is not allowed please do not.</strong>');
+			return false;
+		}
+
+		if (Config.chatfilter) {
+			return Config.chatfilter(user, room, connection, message);
+		}
+		return message;
+	}
+
+	return true;
+}
+ 
 
 exports.package = {};
 fs.readFile('package.json', function (err, data) {
@@ -406,3 +558,46 @@ exports.uncacheTree = function (root) {
 		uncache = newuncache;
 	} while (uncache.length > 0);
 };
+ 
+// This function uses synchronous IO in order to keep it relatively simple.
+// The function takes about 0.023 seconds to run on one tested computer,
+// which is acceptable considering how long the server takes to start up
+// anyway (several seconds).
+exports.computeServerVersion = function() {
+        /**
+         * `filelist.txt` is a list of all the files in this project. It is used
+         * for computing a checksum of the project for the /version command. This
+         * information cannot be determined at runtime because the user may not be
+         * using a git repository (for example, the user may have downloaded an
+         * archive of the files).
+         *
+         * `filelist.txt` is generated by running `git ls-files > filelist.txt`.
+         */
+        var filenames;
+        try {
+                var data = fs.readFileSync('filelist.txt', {encoding: 'utf8'});
+                filenames = data.split('\n');
+        } catch (e) {
+                return 0;
+        }
+        var hash = crypto.createHash('md5');
+        for (var i = 0; i < filenames.length; ++i) {
+                try {
+                        hash.update(fs.readFileSync(filenames[i]));
+                } catch (e) {}
+        }
+        return hash.digest('hex');
+};
+ 
+exports.serverVersion = exports.computeServerVersion();
+ 
+/*********************************************************
+ * Commands
+ *********************************************************/
+ 
+var commands = exports.commands = require('./commands.js').commands;
+ 
+var customCommands = require('./config/commands.js');
+if (customCommands && customCommands.commands) {
+        Object.merge(commands, customCommands.commands);
+}
