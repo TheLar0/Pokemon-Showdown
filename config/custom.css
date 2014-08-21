@@ -14,9 +14,9 @@
 }
 
 body{
-  background: url(http://fc09.deviantart.net/fs71/f/2013/229/5/c/sharpedo_by_ekomira-d6ijjqk.png);
+  background: url(http://i.imgur.com/Rc6Ov6t.png);
   background-size: absolute;
-  color: #01252F;
+  background-repeat: no-repeat;
 }
 
 .message-announce {
@@ -46,79 +46,6 @@ background:#3300FF
 .menugroup .button {
   color: #FFF;
   background: #386AD7;
-}
- 
-.menugroup button.big {
-  color: #FFF;
-  background: #386AD7;
-  width: 230px;
-  padding: 6px 7px 6px 7px;
-  font-size: 14pt;
-}
- 
-.ps-room.ps-room-light {
-        color: black;
-}
- 
-.chat-log-add {
-        position: absolute;
-        bottom: 0px;
-        left: 0px;
-        right: 0px;
-        min-height: 36px;
-        padding: 3px 4px 0px;
-        border-top: 1px solid rgb(72, 61, 139);
-}
- 
-.battle-log {
-        position: absolute;
-        text-align: left;
-        border: 1px solid #686868;
-        background: #C0C0C0;
-        color: black;
-        top: 9px;
-        left: 640px;
-        right: -1px;
-        height: 360px;
-        font-family: Verdana,sans-serif;
-        font-size: 10pt;
-        overflow: auto;
-        overflow-y: scroll;
-        -webkit-overflow-scrolling: touch;
-        overflow-scrolling: touch;
-}
-
-.userbar {
-        top: 18px;
-}
- 
-.userbar .username {
-        text-shadow: none;
-        text-shadow: 1px 1px black;
-}
- 
-.userbar:before {
-        display: block;
-        content:"";
-        width:80px;
-        height: 32px;
-        float: right;
-        position: relative;
-        top: -9px;
-}
- 
-.icon-user {
-        display:none;
-}
- 
-.header {
-        height: 56px;
-        background: #161616;
-}
- 
-.header .logo {
-        float: left;
-        margin: 7px 0px 0 2px;
 }
 
 /*Starbar / Hp bar */
