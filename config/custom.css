@@ -35,6 +35,7 @@ background:#3300FF
   background-repeat: repeat, no-repeat;
   color: #000;
   overflow: auto;
+  opacity: 45;
 }
  
 .menugroup .button:hover {
