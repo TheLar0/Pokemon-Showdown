@@ -13,6 +13,12 @@
 	border: 2px solid #000;
 }
 
+body{
+  background: url(http://fc09.deviantart.net/fs71/f/2013/229/5/c/sharpedo_by_ekomira-d6ijjqk.png);
+  background-size: absolute;
+  color: #01252F;
+}
+
 .message-announce {
 background:#3300FF
 }
@@ -36,10 +42,6 @@ cursor: default;
 padding-top: 3px;
 padding-bottom: 5px;
 top: 0px;
-}
-
-body {
-	background-color: #01262F !important;
 }
 
 .mainmenuwrapper {
@@ -157,7 +159,7 @@ body {
         position: absolute;
         display: none;
         width: 186px;
-        background: url(http://i.imgur.com/IKIMzZJ.png);
+        background: url(http://i.imgur.com/rHmrSQN.png);
         background-repeat: no-repeat;
         background-position: 0px 1px;
         min-height: 40px;
