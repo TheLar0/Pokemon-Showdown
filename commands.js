@@ -507,6 +507,9 @@ var commands = exports.commands = {
 		if (!user.joinRoom(targetRoom || room, connection)) {
 			return connection.sendTo(target, "|noinit|joinfailed|The room '" + target + "' could not be joined.");
 		}
+		if (target.toLowerCase() == "lobby") {
+			return this.sendReplyBox('<center><font size="2"><font color="#212A85">Welcome to Submerged v3.</font></center><img src="http://play.pokemonshowdown.com/sprites/xyani/surskit.gif" height="52" width="75">)
+		}
 	},
 
 	leave: 'part',
