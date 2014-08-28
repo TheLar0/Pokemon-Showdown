@@ -508,7 +508,7 @@ var commands = exports.commands = {
 			return connection.sendTo(target, "|noinit|joinfailed|The room '" + target + "' could not be joined.");
 		}
 		if (target.toLowerCase() == "lobby") {
-			return this.sendReply('|html|<center><font size="2"><font color="#212A85">Welcome to Submerged v3.</font></center><img src="http://play.pokemonshowdown.com/sprites/xyani/surskit.gif" height="52" width="75">')
+			return this.sendReply('|html|<center><font size="3"><font color="#212A85"><b>Welcome to Submerged v3.</b></font></center><center><img src="http://play.pokemonshowdown.com/sprites/xyani/surskit.gif" height="52" width="75"></center>')
 		}
 	},
 
