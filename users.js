@@ -1068,11 +1068,20 @@ User = (function () {
 		var alts = [];
 		for (var i in users) {
 			if (users[i] === this) continue;
-			if (Object.isEmpty(Object.select(this.ips, users[i].ips))) continue;
 			if (!users[i].named && !users[i].connected) continue;
 			if (!getAll && users[i].group !== ' ' && this.group === ' ') continue;
-
-			alts.push(users[i].name);
+			var ipIntersected = false;
+			intersectLoop: for (var myIp in this.ips) {
+				for (var yourIp in users[i].ips) {
+					if (myIp === yourIp) {
+						ipIntersected = true;
+						break intersectLoop;
+					}
+				}
+			}
+			if (ipIntersected) {
+				alts.push(users[i].name);
+			}
 		}
 		return alts;
 	};
@@ -1193,13 +1202,18 @@ User = (function () {
 	User.prototype.joinRoom = function (room, connection) {
 		room = Rooms.get(room);
 		if (!room) return false;
-		if (room.staffRoom && !this.isStaff) return false;
-		if (room.bannedUsers) {
-			if (this.userid in room.bannedUsers || this.autoconfirmed in room.bannedUsers) return false;
-		}
-		if (this.ips && room.bannedIps) {
-			for (var ip in this.ips) {
-				if (ip in room.bannedIps) return false;
+		if (!this.can('bypassall')) {
+			// check if user has permission to join
+			if (room.staffRoom && !this.isStaff) return false;
+			if (room.bannedUsers) {
+				if (this.userid in room.bannedUsers || this.autoconfirmed in room.bannedUsers) {
+					return false;
+				}
+			}
+			if (this.ips && room.bannedIps) {
+				for (var ip in this.ips) {
+					if (ip in room.bannedIps) return false;
+				}
 			}
 		}
 		if (!connection) {
@@ -1213,7 +1227,6 @@ User = (function () {
 			return;
 		}
 		if (!connection.rooms[room.id]) {
-			connection.joinRoom(room);
 			if (!this.roomCount[room.id]) {
 				this.roomCount[room.id] = 1;
 				room.onJoin(this, connection);
@@ -1221,6 +1234,7 @@ User = (function () {
 				this.roomCount[room.id]++;
 				room.onJoinConnection(this, connection);
 			}
+			connection.joinRoom(room);
 		}
 		return true;
 	};

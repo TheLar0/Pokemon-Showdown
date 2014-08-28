@@ -33,15 +33,6 @@ exports.Formats = [
 		name: "Ubers",
 		section: "XY Singles",
 
-		searchShow: false,
-		ruleset: ['Pokemon', 'Standard Ubers', 'Swagger Clause', 'Team Preview'],
-		banlist: []
-	},
-	{
-		name: "Ubers (suspect test)",
-		section: "XY Singles",
-
-		challengeShow: false,
 		ruleset: ['Pokemon', 'Standard Ubers', 'Swagger Clause', 'Team Preview'],
 		banlist: []
 	},
@@ -121,11 +112,13 @@ exports.Formats = [
 		}
 	},
 	/*{
-		name: "CAP Volkraken Playtest",
+		name: "CAP 19 Playtest",
 		section: "XY Singles",
 
-		ruleset: ['CAP Pokemon', 'Standard', 'Team Preview'],
-		banlist: ['Uber', 'Soul Dew', 'Gengarite', 'Kangaskhanite', 'Lucarionite', 'Tomohawk', 'Necturna', 'Mollux', 'Aurumoth', 'Malaconda', 'Cawmodore', 'Syclant', 'Revenankh', 'Pyroak', 'Fidgit', 'Stratagem', 'Arghonaut', 'Kitsunoh', 'Cyclohm', 'Colossoil', 'Krilowatt', 'Voodoom']
+		ruleset: ['CAP Pokemon', 'Standard', 'Team Preview', 'Swagger Clause', 'Baton Pass Clause'],
+		banlist: ['Uber', 'Gengarite', 'Kangaskhanite', 'Lucarionite', 'Mawilite', 'Soul Dew',
+			'Tomohawk', 'Necturna', 'Mollux', 'Aurumoth', 'Malaconda', 'Cawmodore', 'Volkraken', 'Syclant', 'Revenankh', 'Pyroak', 'Fidgit', 'Stratagem', 'Arghonaut', 'Kitsunoh', 'Cyclohm', 'Colossoil', 'Krilowatt', 'Voodoom'
+		]
 	},*/
 	{
 		name: "Custom Game",
@@ -218,7 +211,7 @@ exports.Formats = [
 		},
 		maxForcedLevel: 50,
 		ruleset: ['Pokemon', 'Standard GBU', 'Team Preview VGC'],
-		banlist: ['Aegislash', 'Amoonguss', 'Charizard', 'Cresselia', 'Garchomp', 'Gengar', 'Greninja', 'Gyarados', 'Kangaskhan', 'Landorus', 
+		banlist: ['Aegislash', 'Amoonguss', 'Charizard', 'Cresselia', 'Garchomp', 'Gengar', 'Greninja', 'Gyarados', 'Kangaskhan', 'Landorus',
 			'Landorus-Therian', 'Mawile', 'Meowstic', 'Meowstic-F', 'Rotom', 'Rotom-Fan', 'Rotom-Frost', 'Rotom-Heat', 'Rotom-Mow', 'Rotom-Wash',
 			'Salamence', 'Sylveon', 'Talonflame', 'Thundurus', 'Thundurus-Therian', 'Togekiss', 'Tyranitar'
 		],
@@ -285,7 +278,6 @@ exports.Formats = [
 		section: "XY Triples",
 
 		gameType: 'triples',
-		searchShow: false,
 		ruleset: ['Pokemon', 'Species Clause', 'OHKO Clause', 'Moody Clause', 'Endless Battle Clause', 'HP Percentage Mod', 'Team Preview'],
 		banlist: ['Unreleased', 'Illegal', 'Soul Dew', 'Dark Void',
 			'Mewtwo', 'Lugia', 'Ho-Oh', 'Kyogre', 'Groudon', 'Rayquaza', 'Dialga', 'Palkia', 'Giratina', 'Giratina-Origin',
@@ -301,28 +293,6 @@ exports.Formats = [
 		ruleset: ['Pokemon', 'Standard GBU', 'Team Preview'],
 		validateTeam: function (team, format) {
 			if (team.length < 6) return ['You must have six Pokémon.'];
-		}
-	},
-	{
-		name: "Pikachu Tournamentchu",
-		section: "XY Triples",
-
-		gameType: 'triples',
-		maxForcedLevel: 30,
-		ruleset: ['Pokemon', 'Standard GBU', 'Team Preview', 'Kalos Pokedex'],
-		requirePentagon: true,
-		banlist: ['Eviolite'],
-		validateTeam: function (team, format) {
-			for (var i = 0; i < team.length; i++) {
-				if (Tools.getTemplate(team[i]).species === 'Pikachu') return;
-			}
-			return ['Your team must have Pikachu.'];
-		},
-		validateSet: function (set) {
-			var template = this.getTemplate(set.species || set.name);
-			if (!template.evos || template.evos.length === 0) {
-				return [set.species + " is banned as it cannot evolve."];
-			}
 		}
 	},
 	{
@@ -393,7 +363,7 @@ exports.Formats = [
 		column: 2,
 
 		ruleset: ['CAP Pokemon', 'Standard', 'Team Preview', 'Swagger Clause', 'Baton Pass Clause'],
-		banlist: ['Uber', 'Soul Dew', 'Gengarite', 'Kangaskhanite', 'Lucarionite']
+		banlist: ['Uber', 'Soul Dew', 'Gengarite', 'Kangaskhanite', 'Lucarionite', 'Mawilite']
 	},
 	{
 		name: "Challenge Cup",
@@ -446,8 +416,12 @@ exports.Formats = [
 		name: "OU Monotype",
 		section: "Other Metagames",
 
-		ruleset: ['OU', 'Same Type Clause'],
-		banlist: ['Talonflame']
+		ruleset: ['Pokemon', 'Standard', 'Team Preview', 'Swagger Clause', 'Baton Pass Clause', 'Same Type Clause'],
+		banlist: ['Gengarite', 'Kangaskhanite', 'Lucarionite',
+			'Arceus', 'Blaziken', 'Darkrai', 'Deoxys', 'Deoxys-Attack', 'Dialga', 'Giratina', 'Giratina-Origin', 'Groudon', 'Ho-Oh',
+			'Kyogre', 'Kyurem-White', 'Lugia', 'Mewtwo', 'Palkia', 'Rayquaza', 'Reshiram', 'Shaymin-Sky', 'Talonflame', 'Xerneas',
+			'Yveltal', 'Zekrom'
+		]
 	},
 	{
 		name: "Tier Shift",
@@ -545,7 +519,7 @@ exports.Formats = [
 		banlist: ['DeepSeaScale', 'DeepSeaTooth', 'Eviolite', 'Light Ball', 'Mawilite', 'Medichamite', 'Soul Dew', 'Thick Club', 'Huge Power', 'Pure Power', 'Shedinja', 'Smeargle']
 	},
 	{
-		name: "Hackmons",
+		name: "Classic Hackmons",
 		section: "Other Metagames",
 
 		searchShow: false,
